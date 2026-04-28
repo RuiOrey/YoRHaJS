@@ -189,7 +189,9 @@ export class PhysicsService extends Component {
       linearDamping: _parameters.linearDamping,
       angularDamping: _parameters.angularDamping,
       type: _parameters.type,
-      material: this.slipperyMaterial
+      material: this.slipperyMaterial,
+      collisionFilterGroup: _parameters.collisionFilterGroup,
+      collisionFilterMask: _parameters.collisionFilterMask
     });
     this.world.addBody(_sphereBody);
 
@@ -265,7 +267,9 @@ export class PhysicsService extends Component {
       linearFactor: _parameters.linearFactor,
       angularFactor: _parameters.angularFactor,
       material: _parameters.material,
-      type: _parameters.type
+      type: _parameters.type,
+      collisionFilterGroup: _parameters.collisionFilterGroup,
+      collisionFilterMask: _parameters.collisionFilterMask
     });
 
     this.world.addBody(_boxBody);

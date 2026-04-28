@@ -335,7 +335,18 @@ export const initialScene = {
         debug: true,
         transform: {},
         components: {
-          boardPlaneGeometry: {}
+          boardPlaneGeometry: {},
+          boardWalls: {
+            width: 100,
+            height: 100,
+            wallThickness: 2
+          },
+          boardGrid: {
+            size: 100,
+            divisions: 20,
+            colorCenterLine: 0x888888,
+            colorGrid: 0x555555
+          }
         },
         children: []
       },

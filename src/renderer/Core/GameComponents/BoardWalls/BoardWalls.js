@@ -25,7 +25,7 @@ export class BoardWalls extends React.Component {
       availableService,
       gameObject,
       { x: 0, y: halfHeight + this.wallThickness / 2, z: 0 },
-      { x: wallWidth, y: this.wallThickness, z: this.wallThickness },
+      { x: wallWidth, y: this.wallThickness, z: 20 },
       wallCollisionGroup
     );
 
@@ -34,7 +34,7 @@ export class BoardWalls extends React.Component {
       availableService,
       gameObject,
       { x: 0, y: -(halfHeight + this.wallThickness / 2), z: 0 },
-      { x: wallWidth, y: this.wallThickness, z: this.wallThickness },
+      { x: wallWidth, y: this.wallThickness, z: 20 },
       wallCollisionGroup
     );
 
@@ -43,7 +43,7 @@ export class BoardWalls extends React.Component {
       availableService,
       gameObject,
       { x: -(halfWidth + this.wallThickness / 2), y: 0, z: 0 },
-      { x: this.wallThickness, y: wallHeight, z: this.wallThickness },
+      { x: this.wallThickness, y: wallHeight, z: 20 },
       wallCollisionGroup
     );
 
@@ -52,7 +52,7 @@ export class BoardWalls extends React.Component {
       availableService,
       gameObject,
       { x: halfWidth + this.wallThickness / 2, y: 0, z: 0 },
-      { x: this.wallThickness, y: wallHeight, z: this.wallThickness },
+      { x: this.wallThickness, y: wallHeight, z: 20 },
       wallCollisionGroup
     );
   };
