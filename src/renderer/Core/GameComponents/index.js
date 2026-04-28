@@ -25,6 +25,7 @@ import { BoardGrid } from "./BoardGrid/BoardGrid";
 import { Health } from "./Health/Health";
 import { CollisionDamage } from "./CollisionDamage/CollisionDamage";
 import { DeathHandler } from "./DeathHandler/DeathHandler";
+import { EnemyBulletGeometry } from "./EnemyBullet/EnemyBulletGeometry";
 
 export const components = {
   // objMesh: OBJMeshGeometry,
@@ -52,5 +53,6 @@ export const components = {
   boardGrid: BoardGrid,
   health: Health,
   collisionDamage: CollisionDamage,
-  deathHandler: DeathHandler
+  deathHandler: DeathHandler,
+  enemyBulletGeometry: EnemyBulletGeometry
 };

@@ -251,10 +251,11 @@ export const initialScene = {
         debug: true,
         transform: {},
         components: {
-          sphereGeometry: {
-            basicMaterial: true,
-            castShadow:false,
+          enemyBulletGeometry: {
+            color: 0xff4444,
+            radius: 0.5,
           },
+          bulletMovement: {}
         },
         children: []
       },

@@ -268,6 +268,148 @@ export class Shooter extends React.Component {
     this.bulletId += bulletsToShootNow;
   };
 
+  getShooter = () => {
+    const {
+      gameObject,
+      availableComponent
+    } = this.props;
+    const { scene } = availableComponent;
+    const shooterById = gameObject.getChildGameObjectByTag("playerShooter", scene);
+    return shooterById;
+  };
+
+  shootAimedBullet = time => {
+    const aimedBulletCount = this.props.aimedBulletCount || 1;
+    const totalShotBulletsTime = this.bulletId * this.shootTimeInterval;
+    const timePassedFromLastShot =
+      time - (this.shootingStartTime + totalShotBulletsTime);
+    const bulletsToShootNow = Math.floor(
+      timePassedFromLastShot / this.shootTimeInterval
+    );
+
+    const { transform, selfSettings, availableComponent, gameObject } = this.props;
+    const { scene } = availableComponent;
+    const { moveRatio, displacementRatio } = selfSettings;
+    const { position, rotation, scale } = transform;
+
+    // Find player position
+    const player = this.getShooter();
+    if (!player) {
+      this.bulletId += bulletsToShootNow;
+      return;
+    }
+    const playerPosition = player.transform.position;
+
+    for (let bulletIndex = 1; bulletIndex <= bulletsToShootNow; bulletIndex++) {
+      const startTimeForThisBullet =
+        this.shootingStartTime +
+        totalShotBulletsTime +
+        bulletIndex * this.shootTimeInterval;
+
+      for (let i = 0; i < aimedBulletCount; i++) {
+        // Calculate direction from shooter to player
+        const dx = playerPosition.x - position.x;
+        const dy = playerPosition.y - position.y;
+        const angleToPlayer = Math.atan2(dy, dx) - Math.PI / 2;
+
+        const _rotation = rotation.clone();
+        _rotation._z = angleToPlayer;
+
+        const bullet = this.availableBullets.pop();
+        if (!bullet) { return; }
+        this.movingBullets.push(bullet);
+        const currentBulletId = bullet.props.id;
+        const currentBulletGameObjectId = bullet.props.gameObject.id;
+
+        this.playBulletSound();
+        scene.enqueueAction(
+          updateGameObject(currentBulletGameObjectId, {
+            transform: {
+              position: position.clone(),
+              rotation: _rotation.clone(),
+              scale: scale.clone()
+            },
+            components: {
+              [currentBulletId]: {
+                initTime: startTimeForThisBullet,
+                bulletIndex,
+                moveRatio,
+                displacementRatio,
+                shooterComponentId: this.props.id
+              }
+            }
+          })
+        );
+      }
+    }
+
+    this.bulletId += bulletsToShootNow;
+  };
+
+  spiralAngleOffset = 0;
+
+  shootSpiralBullet = time => {
+    const spiralBulletCount = this.props.spiralBulletCount || 1;
+    const spiralAngleIncrement = this.props.spiralAngleIncrement || (Math.PI / 8);
+    const totalShotBulletsTime = this.bulletId * this.shootTimeInterval;
+    const timePassedFromLastShot =
+      time - (this.shootingStartTime + totalShotBulletsTime);
+    const bulletsToShootNow = Math.floor(
+      timePassedFromLastShot / this.shootTimeInterval
+    );
+
+    const { transform, selfSettings, availableComponent } = this.props;
+    const { scene } = availableComponent;
+    const { moveRatio, displacementRatio } = selfSettings;
+    const { position, rotation, scale } = transform;
+
+    for (let bulletIndex = 1; bulletIndex <= bulletsToShootNow; bulletIndex++) {
+      const startTimeForThisBullet =
+        this.shootingStartTime +
+        totalShotBulletsTime +
+        bulletIndex * this.shootTimeInterval;
+
+      for (let i = 0; i < spiralBulletCount; i++) {
+        const angleForThisBullet = this.spiralAngleOffset + (spiralAngleIncrement * i);
+        const _rotation = rotation.clone();
+        _rotation._z = angleForThisBullet;
+
+        const bullet = this.availableBullets.pop();
+        if (!bullet) { return; }
+        this.movingBullets.push(bullet);
+        const currentBulletId = bullet.props.id;
+        const currentBulletGameObjectId = bullet.props.gameObject.id;
+
+        this.playBulletSound();
+        scene.enqueueAction(
+          updateGameObject(currentBulletGameObjectId, {
+            transform: {
+              position: position.clone(),
+              rotation: _rotation.clone(),
+              scale: scale.clone()
+            },
+            components: {
+              [currentBulletId]: {
+                initTime: startTimeForThisBullet,
+                bulletIndex,
+                moveRatio,
+                displacementRatio,
+                spiralAngleOffset: angleForThisBullet,
+                type: "spiral",
+                shooterComponentId: this.props.id
+              }
+            }
+          })
+        );
+      }
+
+      // Increment spiral offset for next shot cycle
+      this.spiralAngleOffset += spiralAngleIncrement;
+    }
+
+    this.bulletId += bulletsToShootNow;
+  };
+
   startShooting = () => {
     if (this.shooting) {
       return;
@@ -319,7 +461,14 @@ export class Shooter extends React.Component {
     this.updateTime = time;
     if (this.shooting) {
       this.garbageCollectBullets();
-      this.shootAroundBullet(time);
+      const shootMethods = {
+        forward: this.shootForwardBullet,
+        around: this.shootAroundBullet,
+        aimed: this.shootAimedBullet,
+        spiral: this.shootSpiralBullet,
+      };
+      const shootFn = shootMethods[this.type] || this.shootAroundBullet;
+      shootFn.call(this, time);
     }
   };
 

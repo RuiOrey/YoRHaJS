@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 
 import * as CANNON from "cannon";
+import * as THREE from "three";
 
 // TODO: split into components to travel, create geometry, play sound, self destroy, etc (take init functions as hints)
 export class BulletMovement extends React.Component {
@@ -12,6 +13,7 @@ export class BulletMovement extends React.Component {
   shooter = null;
   active = true;
   zCoord = 6 + this.props.bulletIndex * 1.3;
+  bulletType = this.props.type || "forward";
 
   initPhysics = () => {
     const { transform, gameObject, availableService } = this.props;
@@ -42,7 +44,7 @@ export class BulletMovement extends React.Component {
       transformValue.rotation.z
     );
 
-    const localForward = new CANNON.Vec3(0, 1, 0); // correct?
+    const localForward = new CANNON.Vec3(0, 1, 0);
     const worldForward = new CANNON.Vec3();
     transform.physicsBody.vectorToWorldFrame(localForward, worldForward);
     this.initialPosition = transformValue.position.clone();
@@ -94,12 +96,28 @@ export class BulletMovement extends React.Component {
     const worldForward = new CANNON.Vec3();
     transform.physicsBody.vectorToWorldFrame(localForward, worldForward);
 
-    transform.physicsBody.position.y =
-      this.initialPosition.y +
-      (timePassed / 100) * this.moveRatio * worldForward.y;
-    transform.physicsBody.position.x =
-      this.initialPosition.x +
-      (timePassed / 100) * this.moveRatio * worldForward.x;
+    // For spiral bullets, apply rotation over time
+    if (this.bulletType === "spiral" && this.props.spiralRotationSpeed) {
+      const rotationSpeed = this.props.spiralRotationSpeed;
+      const spiralAngleOffset = this.props.spiralAngleOffset || 0;
+      const currentAngle = spiralAngleOffset + (timePassed / 1000) * rotationSpeed;
+      const rotatedX = Math.cos(currentAngle) * worldForward.x - Math.sin(currentAngle) * worldForward.y;
+      const rotatedY = Math.sin(currentAngle) * worldForward.x + Math.cos(currentAngle) * worldForward.y;
+
+      transform.physicsBody.position.y =
+        this.initialPosition.y +
+        (timePassed / 100) * this.moveRatio * rotatedY;
+      transform.physicsBody.position.x =
+        this.initialPosition.x +
+        (timePassed / 100) * this.moveRatio * rotatedX;
+    } else {
+      transform.physicsBody.position.y =
+        this.initialPosition.y +
+        (timePassed / 100) * this.moveRatio * worldForward.y;
+      transform.physicsBody.position.x =
+        this.initialPosition.x +
+        (timePassed / 100) * this.moveRatio * worldForward.x;
+    }
   };
 
   inactivePosition = () => {

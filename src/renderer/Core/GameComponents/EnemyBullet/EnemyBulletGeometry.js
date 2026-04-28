@@ -3,20 +3,20 @@ import PropTypes from "prop-types";
 
 import * as THREE from "three";
 
-// TODO: split into components to travel, create geometry, play sound, self destroy, etc (take init functions as hints)
-export class PlayerBulletGeometry extends React.Component {
-  cube;
+export class EnemyBulletGeometry extends React.Component {
+  mesh;
 
   initBulletGeometry = () => {
-    const { transform, color, emissive, emissiveIntensity, opacity } = this.props;
-    const bulletColor = color !== undefined ? color : 0x88ccff;
-    const bulletEmissive = emissive !== undefined ? emissive : 0x4488aa;
+    const { transform, color, radius, emissiveIntensity, opacity } = this.props;
+    const bulletColor = color !== undefined ? color : 0xff4444;
+    const bulletRadius = radius || 0.5;
+    const emissive = bulletColor;
     const emissiveVal = emissiveIntensity !== undefined ? emissiveIntensity : 0.5;
 
-    const geometry = new THREE.BoxGeometry(1, 3, 1);
+    const geometry = new THREE.SphereGeometry(bulletRadius, 16, 16);
     const material = new THREE.MeshBasicMaterial({
       color: bulletColor,
-      emissive: bulletEmissive,
+      emissive: emissive,
       emissiveIntensity: emissiveVal,
     });
 
@@ -25,10 +25,9 @@ export class PlayerBulletGeometry extends React.Component {
       material.transparent = true;
     }
 
-    this.cube = new THREE.Mesh(geometry, material);
-    transform.add(this.cube);
+    this.mesh = new THREE.Mesh(geometry, material);
+    transform.add(this.mesh);
   };
-
 
   start = () => {
     this.initBulletGeometry();
@@ -39,10 +38,10 @@ export class PlayerBulletGeometry extends React.Component {
   }
 }
 
-PlayerBulletGeometry.propTypes = {
+EnemyBulletGeometry.propTypes = {
   transform: PropTypes.object.isRequired,
   color: PropTypes.number,
-  emissive: PropTypes.number,
+  radius: PropTypes.number,
   emissiveIntensity: PropTypes.number,
   opacity: PropTypes.number
 };
