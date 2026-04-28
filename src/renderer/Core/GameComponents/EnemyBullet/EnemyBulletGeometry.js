@@ -7,17 +7,15 @@ export class EnemyBulletGeometry extends React.Component {
   mesh;
 
   initBulletGeometry = () => {
-    const { transform, color, radius, emissiveIntensity, opacity } = this.props;
+    const { transform, color, radius, opacity } = this.props;
     const bulletColor = color !== undefined ? color : 0xff4444;
     const bulletRadius = radius || 0.5;
     const emissive = bulletColor;
-    const emissiveVal = emissiveIntensity !== undefined ? emissiveIntensity : 0.5;
 
     const geometry = new THREE.SphereGeometry(bulletRadius, 16, 16);
-    const material = new THREE.MeshBasicMaterial({
+    const material = new THREE.MeshPhongMaterial({
       color: bulletColor,
       emissive: emissive,
-      emissiveIntensity: emissiveVal,
     });
 
     if (opacity !== undefined) {

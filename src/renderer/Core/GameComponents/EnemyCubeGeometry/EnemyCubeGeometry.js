@@ -30,7 +30,6 @@ export class EnemyCubeGeometry extends React.Component {
       const cone = new THREE.Mesh(coneGeometry, material);
       cone.position.y = height;
       cone.position.y = 2 * 0.9;
-      console.log(cone, "cone");
       cone.castShadow = true;
       transform.add(cone);
     }

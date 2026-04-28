@@ -8,16 +8,14 @@ export class PlayerBulletGeometry extends React.Component {
   cube;
 
   initBulletGeometry = () => {
-    const { transform, color, emissive, emissiveIntensity, opacity } = this.props;
+    const { transform, color, emissive, opacity } = this.props;
     const bulletColor = color !== undefined ? color : 0x88ccff;
     const bulletEmissive = emissive !== undefined ? emissive : 0x4488aa;
-    const emissiveVal = emissiveIntensity !== undefined ? emissiveIntensity : 0.5;
 
     const geometry = new THREE.BoxGeometry(1, 3, 1);
-    const material = new THREE.MeshBasicMaterial({
+    const material = new THREE.MeshPhongMaterial({
       color: bulletColor,
       emissive: bulletEmissive,
-      emissiveIntensity: emissiveVal,
     });
 
     if (opacity !== undefined) {
