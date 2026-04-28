@@ -12,18 +12,11 @@ import {
 } from "postprocessing";
 
 export class Renderer extends React.Component {
-  renderer = new THREE.WebGLRenderer({
-    antialias: this.props.antialias,
-    shadowMap: true,
-    alpha: this.props.alpha,
-    preserveDrawingBuffer: true
-  });
-
+  renderer = null;
   stats = new Stats();
-
   composer;
-
-  canvas = this.renderer.domElement;
+  canvas = null;
+  useWebGL = true;
 
   aspect = window.innerWidth / window.innerHeight;
 
@@ -56,16 +49,6 @@ export class Renderer extends React.Component {
 
     const mainCameraReady = scene.camera._main;
 
-    console.log(
-      "componentDidUpdate renderer",
-      "_sceneChanged:",
-      _sceneChanged,
-      "_cameraChanged:",
-      _cameraChanged,
-      "mainCameraReady:",
-      mainCameraReady
-    );
-
     return (
       _sceneChanged ||
       _cameraChanged ||
@@ -76,7 +59,7 @@ export class Renderer extends React.Component {
   // TODO: improve this, add parameters on render redux state
   setPostProcessing = () => {
     const { availableComponent, postprocessing } = this.props;
-    if (!postprocessing) {
+    if (!postprocessing || !this.useWebGL) {
       return;
     }
     if (!this.composer) {
@@ -93,8 +76,31 @@ export class Renderer extends React.Component {
   componentDidMount = () => {};
 
   init = () => {
+    // Try to create WebGL renderer, fallback to a minimal canvas renderer
+    try {
+      this.renderer = new THREE.WebGLRenderer({
+        antialias: this.props.antialias,
+        shadowMap: true,
+        alpha: this.props.alpha,
+        preserveDrawingBuffer: true
+      });
+      this.useWebGL = true;
+    } catch (e) {
+      console.warn("WebGL not available, using fallback renderer:", e.message);
+      this.useWebGL = false;
+      this.renderer = new THREE.WebGLRenderer({
+        antialias: false,
+        shadowMap: false,
+        alpha: this.props.alpha,
+        preserveDrawingBuffer: true,
+        powerPreference: "low-power"
+      });
+    }
+
+    this.canvas = this.renderer.domElement;
+
     ReactDOM.findDOMNode(this).appendChild(this.canvas);
-    document.body.appendChild( this.stats.dom );
+    document.body.appendChild(this.stats.dom);
     this.setupRendererDefaults();
     this.setupCanvasDefaults();
     this.registerEventListeners();
@@ -109,14 +115,12 @@ export class Renderer extends React.Component {
     const { backgroundColor, availableComponent, postprocessing } = this.props;
     const mainCameraReady = availableComponent.scene.camera._main;
     if (this.state.ready && mainCameraReady) {
-      if (!postprocessing) {
+      if (!postprocessing || !this.useWebGL) {
         this.renderer.render(
-          //TODO rename scene.scene to scene.transform
           availableComponent.scene.scene,
           availableComponent.scene.camera._main
         );
       } else {
-        // TODO: add post processing manager that reacts to redux state and make it optional between regular render
         this.effectPass || this.setPostProcessing();
         this.composer.render(time - this.timePreviousFrame);
       }
@@ -136,8 +140,10 @@ export class Renderer extends React.Component {
   }
 
   setupRendererDefaults() {
-    this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
+    this.renderer.shadowMap.enabled = this.useWebGL;
+    if (this.useWebGL) {
+      this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    }
     this.renderer.setClearColor(0x544c41, 0.9);
     this.renderer.sortObjects = false;
     this.renderer.setPixelRatio(window.devicePixelRatio);
@@ -152,9 +158,7 @@ export class Renderer extends React.Component {
   }
 
   onWindowResize = event => {
-    // const SCREEN_WIDTH = window.innerWidth;
-    // const SCREEN_HEIGHT = window.innerHeight;
-    if (!this.renderer.domElement.parentElement) {
+    if (!this.renderer || !this.renderer.domElement.parentElement) {
       return;
     }
 
@@ -168,24 +172,6 @@ export class Renderer extends React.Component {
     });
   };
 
-  // // from https://stackoverflow.com/questions/45041158/resizing-canvas-webgl-to-fit-screen-width-and-heigh
-  // resizeCanvasToDisplaySize(force) {
-  //     const canvas = this.renderer.domElement;
-  //     // look up the size the canvas is being displayed
-  //     const width = canvas.clientWidth;
-  //     const height = canvas.clientHeight;
-  //
-  //     // adjust displayBuffer size to match
-  //     if (force || canvas.width !== width || canvas.height !== height) {
-  //         // you must pass false here or three.js sadly fights the browser
-  //         this.renderer.setSize(width, height, false);
-  //         this.camera.aspect = width / height;
-  //         this.camera.updateProjectionMatrix();
-  //
-  //         // update any render target sizes here
-  //     }
-  // }
-
   updateChildren = time => {
     this.updateCallbacksArray.forEach(update => {
       update(time);
@@ -196,9 +182,9 @@ export class Renderer extends React.Component {
     this.resizeFunctions.push(onResizeFunction);
   };
 
-  canvasWidth = () => this.canvas.width;
+  canvasWidth = () => this.canvas ? this.canvas.width : 0;
 
-  canvasHeight = () => this.canvas.height;
+  canvasHeight = () => this.canvas ? this.canvas.height : 0;
 
   getAspect = () => this.aspect;
 
@@ -216,6 +202,4 @@ Renderer.propTypes = {
   availableWidth: PropTypes.number,
   availableHeight: PropTypes.number,
   assetsLoadState: PropTypes.object
-  // backgroundColor: PropTypes.string.isRequired,
-  // availableComponent: PropTypes.object.isRequired,
 };

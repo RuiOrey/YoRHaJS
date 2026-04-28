@@ -21,10 +21,10 @@ module.exports = defineConfig({
         browserName: "chromium",
         launchOptions: {
           args: [
-            "--use-gl=swiftshader",
-            "--disable-gpu",
             "--no-sandbox",
             "--disable-setuid-sandbox",
+            "--disable-gpu-sandbox",
+            "--use-gl=egl",
           ],
         },
       },
