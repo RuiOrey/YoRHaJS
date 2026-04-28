@@ -9,7 +9,7 @@ module.exports = defineConfig({
   workers: 1,
   reporter: "list",
   use: {
-    baseURL: "http://localhost:3000",
+    baseURL: "http://127.0.0.1:3000",
     trace: "on-first-retry",
     screenshot: "only-on-failure",
     video: "retain-on-failure",
@@ -20,11 +20,11 @@ module.exports = defineConfig({
       use: {
         browserName: "chromium",
         launchOptions: {
+          executablePath: "/usr/bin/chromium",
           args: [
             "--no-sandbox",
             "--disable-setuid-sandbox",
-            "--disable-gpu-sandbox",
-            "--use-gl=egl",
+            "--disable-gpu",
           ],
         },
       },

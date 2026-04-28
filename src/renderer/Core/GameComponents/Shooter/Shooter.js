@@ -70,6 +70,11 @@ export class Shooter extends React.Component {
       const { moveRatio, displacementRatio } = selfSettings;
       const { position, rotation, scale } = transform;
       const bullet = this.availableBullets.pop();
+      if (!bullet) {
+        // Bullet pool exhausted — skip this shot cycle
+        this.bulletId += bulletsToShootNow - bulletIndex + 1;
+        return;
+      }
       this.movingBullets.push(bullet);
       const currentBulletId = bullet.props.id;
       const currentBulletGameObjectId = bullet.props.gameObject.id;

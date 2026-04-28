@@ -76,7 +76,7 @@ export class Renderer extends React.Component {
   componentDidMount = () => {};
 
   init = () => {
-    // Try to create WebGL renderer, fallback to a minimal canvas renderer
+    // Try to create WebGL renderer, fallback to a plain canvas
     try {
       this.renderer = new THREE.WebGLRenderer({
         antialias: this.props.antialias,
@@ -86,15 +86,32 @@ export class Renderer extends React.Component {
       });
       this.useWebGL = true;
     } catch (e) {
-      console.warn("WebGL not available, using fallback renderer:", e.message);
+      console.warn("WebGL not available, using fallback canvas:", e.message);
       this.useWebGL = false;
-      this.renderer = new THREE.WebGLRenderer({
-        antialias: false,
-        shadowMap: false,
-        alpha: this.props.alpha,
-        preserveDrawingBuffer: true,
-        powerPreference: "low-power"
-      });
+      // Create a plain canvas as fallback — game logic still runs
+      this.canvas = document.createElement("canvas");
+      this.canvas.width = window.innerWidth;
+      this.canvas.height = window.innerHeight;
+      this.canvas.style.background = "#544c41";
+      this.canvas.style.width = "100%";
+      this.canvas.style.height = "100%";
+      // Minimal renderer that just clears the canvas
+      this.renderer = {
+        domElement: this.canvas,
+        render: () => {},
+        setClearColor: () => {},
+        setSize: (w, h) => { this.canvas.width = w; this.canvas.height = h; },
+        setPixelRatio: () => {},
+        shadowMap: { enabled: false },
+        sortObjects: false,
+      };
+      ReactDOM.findDOMNode(this).appendChild(this.canvas);
+      document.body.appendChild(this.stats.dom);
+      this.registerEventListeners();
+      this.setState({ ready: true });
+      window.THREE = THREE;
+      this.onWindowResize();
+      return;
     }
 
     this.canvas = this.renderer.domElement;
