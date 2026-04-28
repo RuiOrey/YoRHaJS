@@ -58,3 +58,15 @@ export const destroyGameObjectById = (gameObjectId) => ({
   type: "DESTROY_GAMEOBJECT_BYID",
   gameObjectId,
 });
+
+export const damageGameObject = (gameObjectId, componentId, damage) => ({
+  type: "DAMAGE_GAME_OBJECT",
+  gameObjectId,
+  componentId,
+  damage,
+});
+
+export const destroyGameObject = (gameObjectId) => ({
+  type: "DESTROY_GAME_OBJECT",
+  gameObjectId,
+});

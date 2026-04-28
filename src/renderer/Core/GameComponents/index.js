@@ -20,6 +20,11 @@ import { BulletMovement } from "./Bullet/BulletMovement";
 import { EnemyCubeGeometry } from "./EnemyCubeGeometry/EnemyCubeGeometry";
 import { TestCube } from "./TestCube/TestCube";
 import { SphereGeometry } from "./SphereGeometry/SphereGeometry";
+import { BoardWalls } from "./BoardWalls/BoardWalls";
+import { BoardGrid } from "./BoardGrid/BoardGrid";
+import { Health } from "./Health/Health";
+import { CollisionDamage } from "./CollisionDamage/CollisionDamage";
+import { DeathHandler } from "./DeathHandler/DeathHandler";
 
 export const components = {
   // objMesh: OBJMeshGeometry,
@@ -42,5 +47,10 @@ export const components = {
   sphereGeometry: SphereGeometry,
   bulletMovement: BulletMovement,
   enemyMovementControls: EnemyMovementControls,
-  enemyCubeGeometry: EnemyCubeGeometry
+  enemyCubeGeometry: EnemyCubeGeometry,
+  boardWalls: BoardWalls,
+  boardGrid: BoardGrid,
+  health: Health,
+  collisionDamage: CollisionDamage,
+  deathHandler: DeathHandler
 };

@@ -251,6 +251,76 @@ export const mainReducer = (state = initialScene, action) => {
         scene: temp.scene
       };
       return temp.state;
+    case "DAMAGE_GAME_OBJECT":
+      temp.state = state;
+      if (!state.gameObjects.byId[action.gameObjectId]) {
+        console.log("GameObject not found for damage ", action.gameObjectId);
+        return temp.state;
+      }
+      temp.gameObject = _.cloneDeep(
+        state.gameObjects.byId[action.gameObjectId]
+      );
+      temp.components = temp.gameObject.components || {};
+      if (action.componentId && temp.components[action.componentId]) {
+        temp.components[action.componentId] = {
+          ...temp.components[action.componentId],
+          currentHealth: action.damage !== undefined
+            ? action.damage
+            : (temp.components[action.componentId].currentHealth || 0)
+        };
+      }
+      temp.gameObject = {
+        ...temp.gameObject,
+        components: {
+          ...temp.components
+        }
+      };
+      temp.state = {
+        ...state,
+        gameObjects: {
+          ...temp.state.gameObjects,
+          byId: {
+            ...temp.state.gameObjects.byId,
+            [action.gameObjectId]: temp.gameObject
+          }
+        }
+      };
+      return temp.state;
+    case "DESTROY_GAME_OBJECT":
+      temp.gameObjects = _.cloneDeep(state.gameObjects);
+      temp.scene = _.cloneDeep(state.scene);
+      if (!temp.gameObjects.allIds.includes(action.gameObjectId)) {
+        console.log("GameObject does not exist for destroy ", action.gameObjectId);
+        return state;
+      }
+      let _destroyParent;
+      if (temp.gameObjects.byId[action.gameObjectId].parentId) {
+        const _destroyParentId = temp.gameObjects.byId[action.gameObjectId].parentId;
+        _destroyParent = temp.gameObjects.byId[_destroyParentId];
+      } else {
+        _destroyParent = temp.scene;
+      }
+      if (_destroyParent && _destroyParent.children) {
+        _destroyParent.children = _destroyParent.children.filter(childrenId => {
+          return childrenId !== action.gameObjectId;
+        });
+      }
+      delete temp.gameObjects.byId[action.gameObjectId];
+      temp.gameObjects.allIds = temp.gameObjects.allIds.filter(id => {
+        return id !== action.gameObjectId;
+      });
+      temp.gameObjects = {
+        ...state.gameObjects,
+        byId: temp.gameObjects.byId,
+        allIds: temp.gameObjects.allIds
+      };
+
+      temp.state = {
+        ...state,
+        gameObjects: temp.gameObjects,
+        scene: temp.scene
+      };
+      return temp.state;
     default:
       return state;
   }
