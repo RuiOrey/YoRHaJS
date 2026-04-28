@@ -64,36 +64,22 @@ export class PlayerControls extends React.Component {
   };
   moveLeft = () => {
     const { transform } = this.props;
-    // console.log('moveLeft');
-    // this.activeMovements.left=true;
-    transform.physicsBody.position.x -= this.moveRatio * this.deltaUpdate;
-    // let forwardVector = new CANNON.Vec3(-1, 0, 0);
-    // forwardVector.scale(this.fixedSpeed,transform.physicsBody.velocity);
+    transform.physicsBody.velocity.x = -this.moveRatio * this.deltaUpdate * 10;
   };
 
   moveRight = () => {
     const { transform } = this.props;
-    // console.log('moveRight');
-    transform.physicsBody.position.x += this.moveRatio * this.deltaUpdate;
-    // let forwardVector = new CANNON.Vec3(1,0, 0);
-    // forwardVector.scale(this.fixedSpeed,transform.physicsBody.velocity);
+    transform.physicsBody.velocity.x = this.moveRatio * this.deltaUpdate * 10;
   };
 
   moveUp = () => {
     const { transform } = this.props;
-    // console.log('moveUp');
-    transform.physicsBody.position.y += this.moveRatio * this.deltaUpdate;
-
-    // let forwardVector = new CANNON.Vec3(0, 1, 0);
-    // forwardVector.scale(this.fixedSpeed,transform.physicsBody.velocity);
+    transform.physicsBody.velocity.y = this.moveRatio * this.deltaUpdate * 10;
   };
 
   moveDown = () => {
     const { transform } = this.props;
-    // console.log('moveDown',transform.physicsBody);
-    transform.physicsBody.position.y -= this.moveRatio * this.deltaUpdate;
-    // let forwardVector = new CANNON.Vec3(0, -1, 0);
-    // forwardVector.scale(this.fixedSpeed,transform.physicsBody.velocity);
+    transform.physicsBody.velocity.y = -this.moveRatio * this.deltaUpdate * 10;
   };
 
   startShooting = () => {
@@ -142,7 +128,12 @@ export class PlayerControls extends React.Component {
   };
 
   updateMovement = () => {
-    // transform.rotation.y += 0.01;s
+    const { transform } = this.props;
+    // Reset velocity each frame before applying active directions
+    transform.physicsBody.velocity.x = 0;
+    transform.physicsBody.velocity.y = 0;
+    transform.physicsBody.velocity.z = 0;
+
     if (this.state.activeLeft) this.moveLeft();
     if (this.state.activeRight) this.moveRight();
     if (this.state.activeUp) this.moveUp();
@@ -219,6 +210,15 @@ export class PlayerControls extends React.Component {
     this.registerEvents();
     // transform.add( this.mesh );
     this.addMouseDebugMesh();
+    // Expose player position for browser tests
+    if (typeof window !== "undefined") {
+      window.__PLAYER_POSITION__ = () => {
+        const body = this.props.transform.physicsBody;
+        return body
+          ? { x: body.position.x, y: body.position.y, z: body.position.z }
+          : null;
+      };
+    }
   };
 
   update = ( time, deltaTime ) => {

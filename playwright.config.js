@@ -29,6 +29,48 @@ module.exports = defineConfig({
         },
       },
     },
+    {
+      name: "firefox",
+      use: {
+        browserName: "firefox",
+      },
+    },
+    {
+      name: "chromium-webgl",
+      use: {
+        browserName: "chromium",
+        launchOptions: {
+          executablePath: "/usr/bin/chromium",
+          args: [
+            "--no-sandbox",
+            "--disable-setuid-sandbox",
+            "--use-gl=swiftshader-webgl",
+            "--enable-unsafe-swiftshader",
+          ],
+        },
+      },
+    },
+    {
+      name: "chromium-headed",
+      use: {
+        browserName: "chromium",
+        headless: false,
+        launchOptions: {
+          executablePath: "/usr/bin/chromium",
+          args: [
+            "--no-sandbox",
+            "--disable-setuid-sandbox",
+          ],
+        },
+      },
+    },
+    {
+      name: "firefox-headed",
+      use: {
+        browserName: "firefox",
+        headless: false,
+      },
+    },
   ],
   webServer: {
     command: "npm start",

@@ -2,6 +2,7 @@ import React from "react";
 
 import PropTypes from "prop-types";
 import * as THREE from "three";
+import * as CANNON from "cannon";
 
 export class PlayerShooterGeometry extends React.Component {
   mesh;
@@ -115,7 +116,12 @@ export class PlayerShooterGeometry extends React.Component {
 
     this.props.availableService.physics.addNewBoxBody(
       gameObject.transform,
-      { ...this.props, position: transform.position, collisionFilterGroup: 1 },
+      {
+        ...this.props,
+        position: transform.position,
+        collisionFilterGroup: 1,
+        linearFactor: new CANNON.Vec3(1, 1, 0)
+      },
       this
     );
   };

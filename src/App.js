@@ -13,6 +13,10 @@ const store = createStore(
     process.env.NODE_ENV === "development" && window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__(),
 );
 
+if (typeof window !== "undefined") {
+    window.store = store;
+}
+
 class App extends Component {
   render() {
     return (
